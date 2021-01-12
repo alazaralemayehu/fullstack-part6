@@ -1,7 +1,19 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { voteFor } from '../reducers/anecdoteReducer'
-const Anecdote = ({ anecdote , handleClick }) => {
+import { voteNotification , clearNotficiation} from '../reducers/notificationReducer'
+import Notification from './Notification'
+const Anecdote = ({ anecdote }) => {
+  const dispatch = useDispatch()
+
+  const vote = (id) => {
+    const message = `You have voted for '${anecdote.content}'`
+    dispatch(voteFor(id))
+
+    dispatch(voteNotification(message))
+    setTimeout(() => dispatch(clearNotficiation()), 5000)
+  }
+
   return (
     <div>
       <div>
@@ -9,24 +21,43 @@ const Anecdote = ({ anecdote , handleClick }) => {
       </div>
       <div>
         has {anecdote.votes}
-        <button onClick={() => handleClick(anecdote.id)}>vote</button>
+        <button onClick= {() => vote(anecdote.id)} >vote</button>
       </div>
     </div>
   )
 }
 
 const Ancedotes = () => {
-  const dispatch = useDispatch()
-  const ancedotes = useSelector(state => state)
+  
+  const states = useSelector(state => {
+    if (state.filter && state.filter !== '') {
+      return {...state, anecdotes: state.anecdotes.filter(a => a.content.includes(state.filter))}
+    }
+    return state
+  })
 
+  
+  const getNotification = () => {
+    const notification = states.notification
+    if (notification) {
+      console.log("Something happened")
+      return  (
+        <div>
+          <Notification Notification= {notification}/>
+        </div>)
+    } else {
+      console.log("cleared")
+      return (<div> </div>)
+    }
+  }
+  
   return (
     <div>
-      <h2>Anecdotes</h2>
-      {ancedotes.map(anecdote =>
+      {getNotification()}
+      {states.anecdotes.map(anecdote =>
         <Anecdote
           key={anecdote.id}
           anecdote ={anecdote} 
-          handleClick = {() => dispatch(voteFor(anecdote.id))}
           />
       )}
     </div>

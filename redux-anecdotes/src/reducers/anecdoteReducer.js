@@ -22,11 +22,8 @@ const initialState = anecdotesAtStart.map(asObject)
 export const createAnecdote = (anecdote) => {
   return {
     type: 'NEW_ANECDOTE',
-    data : {
-      anecdote,
-      votes: 0,
-      id: getId()
-    }
+
+    data : asObject(anecdote)
   }
 }
 
